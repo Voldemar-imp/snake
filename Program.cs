@@ -107,7 +107,7 @@ namespace Map
                     }
                 }
             }
-;
+
             return map;
         }
 
