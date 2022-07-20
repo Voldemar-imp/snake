@@ -204,9 +204,9 @@ namespace Map
 
         static void FinishGame(int tailValue, int sleep)
         {
-            Console.SetCursorPosition(16, 0);
+            Console.SetCursorPosition(0, 0);
             СhangeTextСolor("Game over", ConsoleColor.Yellow);
-            Console.SetCursorPosition(11, 1);
+            Console.SetCursorPosition(0, 1);
             СhangeTextСolor("Вы поймали " + (tailValue - 1) + " мышек", ConsoleColor.Green);
             System.Threading.Thread.Sleep(sleep);
         }
