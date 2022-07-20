@@ -11,23 +11,23 @@ namespace Map
     {
         static void Main(string[] args)
         {     
-            int snakeX;
-            int snakeY;
-            int snakeDX = 0;
-            int snakeDY = 1;
+            int snakePositionX;
+            int snakePositionY;
+            int snakeDirectionX = 0;
+            int snakeDirectionY = 1;
             int tailValue = 1;
             int mausCount = 5;
-            int[] snakeTailX = new int[tailValue];
-            int[] snakeTailY = new int[tailValue];
+            int[] snakeTailPositionsX = new int[tailValue];
+            int[] snakeTailPositionsY = new int[tailValue];
             int sleep1 = 100;
             int sleep2 = 3000;
             bool isPlaying = true;
 
-            char[,] map1 = ReadMap("map1", out snakeX, out snakeY);
+            char[,] map1 = ReadMap("map1", out snakePositionX, out snakePositionY);
             Console.CursorVisible = false;
             DrawMap(map1);
-            snakeTailX[0] = snakeX;
-            snakeTailY[0] = snakeY;
+            snakeTailPositionsX[0] = snakePositionX;
+            snakeTailPositionsY[0] = snakePositionY;
 
             for (int i = 0; i < mausCount; i++)
             {
@@ -37,43 +37,20 @@ namespace Map
             while (isPlaying)
             {
                 DrawMap(map1);
+                GetDirection(ref  snakeDirectionX, ref  snakeDirectionY);             
 
-                if (Console.KeyAvailable)
+                if (map1[snakePositionX + snakeDirectionX, snakePositionY + snakeDirectionY] != '#' && map1[snakePositionX + snakeDirectionX, snakePositionY + snakeDirectionY] != '&')
                 {
-                    ConsoleKeyInfo key = Console.ReadKey();
-                    switch (key.Key)
-                    {
-                        case ConsoleKey.UpArrow:
-                            snakeDX = -1;
-                            snakeDY = 0;
-                            break;
-                        case ConsoleKey.DownArrow:
-                            snakeDX = 1;
-                            snakeDY = 0;
-                            break;
-                        case ConsoleKey.RightArrow:
-                            snakeDX = 0;
-                            snakeDY = 1;
-                            break;
-                        case ConsoleKey.LeftArrow:
-                            snakeDX = 0;
-                            snakeDY = -1;
-                            break;
-                    }
-                }                
-
-                if (map1[snakeX + snakeDX, snakeY + snakeDY] != '#' && map1[snakeX + snakeDX, snakeY + snakeDY] != '&')
-                {
-                    DrawSnakeTail(map1, snakeTailX, snakeTailY,  snakeY, snakeX);
-                    MoveSnake(map1, ref snakeY, ref snakeX, snakeDY, snakeDX);
+                    DrawSnakeTail(map1, snakeTailPositionsX, snakeTailPositionsY,  snakePositionY, snakePositionX);
+                    MoveSnake(map1, ref snakePositionY, ref snakePositionX, snakeDirectionY, snakeDirectionX);
                 }
-                else if (map1[snakeX + snakeDX, snakeY + snakeDY] == '&')
+                else if (map1[snakePositionX + snakeDirectionX, snakePositionY + snakeDirectionY] == '&')
                 {
                     tailValue++;
-                    snakeTailX = ElargeArray(snakeTailX, tailValue);
-                    snakeTailY = ElargeArray(snakeTailY, tailValue);
-                    DrawSnakeTail(map1, snakeTailX, snakeTailY, snakeY, snakeX);
-                    MoveSnake(map1, ref snakeY, ref snakeX, snakeDY, snakeDX);
+                    snakeTailPositionsX = ElargeArray(snakeTailPositionsX, tailValue);
+                    snakeTailPositionsY = ElargeArray(snakeTailPositionsY, tailValue);
+                    DrawSnakeTail(map1, snakeTailPositionsX, snakeTailPositionsY, snakePositionY, snakePositionX);
+                    MoveSnake(map1, ref snakePositionY, ref snakePositionX, snakeDirectionY, snakeDirectionX);
                     DrawNewMaus(map1);
                 }
                 else
@@ -88,10 +65,10 @@ namespace Map
             Console.Clear();
         }
 
-        static char[,] ReadMap(string mapName, out int snakeX, out int snakeY)
+        static char[,] ReadMap(string mapName, out int positionX, out int positionY)
         {
-            snakeX = 0;
-            snakeY = 0;
+            positionX = 0;
+            positionY = 0;
             string[] newFile = File.ReadAllLines($"maps/{mapName}.txt");
             char[,] map = new char[newFile.Length, newFile[0].Length];
 
@@ -102,8 +79,8 @@ namespace Map
                     map[i, j] = newFile[i][j];
                     if (map[i, j] == '@')
                     {
-                        snakeX = i;
-                        snakeY = j;
+                        positionX = i;
+                        positionY = j;
                     }
                 }
             }
@@ -140,42 +117,71 @@ namespace Map
             }
         }       
 
-        static void DrawSnakeTail(char[,] map1, int [] snakeTailX, int[] snakeTailY, int snakeY, int snakeX)
+        static void GetDirection(ref int snakeDirectionX, ref int snakeDirectionY)
         {
-            snakeTailX = ShiftArray(snakeTailX, snakeX);
-            snakeTailY = ShiftArray(snakeTailY, snakeY);
-            int cursorX = snakeTailX [0];
-            int cursorY = snakeTailY [0];
-            Console.SetCursorPosition(cursorY, cursorX);
-            map1[cursorX, cursorY] = '#';
+            if (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo key = Console.ReadKey();
+                switch (key.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        snakeDirectionX = -1;
+                        snakeDirectionY = 0;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        snakeDirectionX = 1;
+                        snakeDirectionY = 0;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        snakeDirectionX = 0;
+                        snakeDirectionY = 1;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        snakeDirectionX = 0;
+                        snakeDirectionY = -1;
+                        break;
+                }
+            }
+        }
+
+        static void DrawSnakeTail(char[,] map1, int [] snakeTailPositionsX, int[] snakeTailPositionsY, int snakePositionY, int snakePositionX)
+        {
+            snakeTailPositionsX = ShiftArray(snakeTailPositionsX, snakePositionX);
+            snakeTailPositionsY = ShiftArray(snakeTailPositionsY, snakePositionY);
+            int cursorPositionX = snakeTailPositionsX [0];
+            int cursorPositionY = snakeTailPositionsY [0];
+            Console.SetCursorPosition(cursorPositionY, cursorPositionX);
+            map1[cursorPositionX, cursorPositionY] = '#';
             СhangeTextСolor("#", ConsoleColor.Red);
-            cursorX = snakeTailX[snakeTailX.Length - 1];
-            cursorY = snakeTailY[snakeTailY.Length - 1];
-            Console.SetCursorPosition(cursorY, cursorX);
-            map1[cursorX, cursorY] = ' ';
+            cursorPositionX = snakeTailPositionsX[snakeTailPositionsX.Length - 1];
+            cursorPositionY = snakeTailPositionsY[snakeTailPositionsY.Length - 1];
+            Console.SetCursorPosition(cursorPositionY, cursorPositionX);
+            map1[cursorPositionX, cursorPositionY] = ' ';
             Console.Write(" ");
         }
 
-        static void MoveSnake(char[,] map1, ref int snakeY, ref int snakeX, int snakeDY, int snakeDX)
+        static void MoveSnake(char[,] map1, ref int snakePositionsY, ref int snakePositionsX, int snakeDirectionY, int snakeDirectionX)
         {
-            snakeY += snakeDY;
-            snakeX += snakeDX;
-            Console.SetCursorPosition(snakeY, snakeX);
+            snakePositionsY += snakeDirectionY;
+            snakePositionsX += snakeDirectionX;
+            Console.SetCursorPosition(snakePositionsY, snakePositionsX);
             СhangeTextСolor("@", ConsoleColor.Yellow);
-            map1[snakeX, snakeY] = '@';
+            map1[snakePositionsX, snakePositionsY] = '@';
         }
 
         static void DrawNewMaus(char[,] map)
         {
             Random random = new Random();
-            int X = 0;
-            int Y = 0;
-            while (map[X, Y] != ' ')
+            int positionX = 0;
+            int positionY = 0;
+
+            while (map[positionX, positionY] != ' ')
             {
-                X = random.Next(map.GetLength(0) - 1);
-                Y = random.Next(map.GetLength(1) - 1);
+                positionX = random.Next(map.GetLength(0) - 1);
+                positionY = random.Next(map.GetLength(1) - 1);
             }
-            map[X, Y] = '&';
+
+            map[positionX, positionY] = '&';
         }
 
         static int[] ShiftArray(int[] array, int value)
@@ -211,11 +217,11 @@ namespace Map
             System.Threading.Thread.Sleep(sleep);
         }
 
-        static void СhangeTextСolor(string message, ConsoleColor сolor)
+        static void СhangeTextСolor(string text, ConsoleColor сolor)
         {
             ConsoleColor defaultColor = Console.ForegroundColor;
             Console.ForegroundColor = сolor;
-            Console.Write(message);
+            Console.Write(text);
             Console.ForegroundColor = defaultColor;
         }
     }
